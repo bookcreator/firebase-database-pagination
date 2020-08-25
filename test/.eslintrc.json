@@ -1,0 +1,13 @@
+{
+   "extends": [
+      "../.eslintrc.json",
+      "plugin:mocha/recommended"
+   ],
+   "env": {
+      "mocha": true
+   },
+   "rules": {
+      "mocha/no-top-level-hooks": "off",
+      "mocha/no-setup-in-describe": "off"
+   }
+}

@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+# Forwards arguements to mocha test runner while executing the tests using the emulator
+#
+# Usage runner <mocha args>
+
+set -e
+
+exec firebase --config test/fixtures/firebase.json --project against-emulator emulators:exec --only database "./node_modules/mocha/bin/mocha $*"

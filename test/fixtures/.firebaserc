@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "against-emulator": {
+      "database": {
+        "default": [
+          "against-emulator"
+        ]
+      }
+    }
+  }
+}

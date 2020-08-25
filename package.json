@@ -1,0 +1,42 @@
+{
+  "name": "firebase-database-pagination",
+  "version": "0.0.1",
+  "description": "Pagination for Firebase RTDB",
+  "main": "index.js",
+  "files": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bookcreator/firebase-database-pagination"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "author": {
+    "name": "Rich H",
+    "email": "rich@bookcreator.com"
+  },
+  "license": "ISC",
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "lint": "eslint --cache --fix .",
+    "test-debug": "test/runner --inspect=60000 --no-timeout",
+    "test": "nyc --reporter=html --reporter=text-summary test/runner",
+    "preci-test": "yarn lint",
+    "ci-test": "nyc --reporter=text --reporter=text-summary test/runner --forbid-only",
+    "postversion": "git push --follow-tags",
+    "int-test": "mocha --forbid-only"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^7.6.0",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "firebase-admin": "^9.1.1",
+    "firebase-tools": "^8.9.0",
+    "mocha": "^8.1.1",
+    "nyc": "^15.1.0",
+    "sinon": "^9.0.3"
+  }
+}
