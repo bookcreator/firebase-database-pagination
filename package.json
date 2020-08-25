@@ -1,6 +1,6 @@
 {
   "name": "firebase-database-pagination",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Pagination for Firebase RTDB",
   "main": "index.js",
   "files": [],
