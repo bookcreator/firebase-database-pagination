@@ -150,6 +150,11 @@ describe('.key', function () {
          assert.lengthOf(results, 1)
          assert.sameOrderedMembers(results.map(d => d.key), ['REF_5'])
       })
+
+      it('should return no values when using same startAt and endAt limit that match nothing', async function () {
+         const results = await paginate.key(database.ref('limitChildren'), 3, { startAt: 'REF_X', endAt: 'REF_X' })
+         assert.deepStrictEqual(results, [])
+      })
    })
 
    describe('.transformed', function () {
@@ -240,6 +245,12 @@ describe('.key', function () {
             const results = await paginate.key.transformed(database.ref('limitChildren'), 3, transformStub, { startAt: 'REF_5', endAt: 'REF_5' })
             assert.sameOrderedMembers(results, ['REF_5'])
             sinon.assert.calledOnce(transformStub)
+         })
+
+         it('should return no values when using same startAt and endAt limit that match nothing', async function () {
+            const results = await paginate.key.transformed(database.ref('limitChildren'), 3, transformStub, { startAt: 'REF_X', endAt: 'REF_X' })
+            assert.deepStrictEqual(results, [])
+            sinon.assert.notCalled(transformStub)
          })
       })
    })

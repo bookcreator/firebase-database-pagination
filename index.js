@@ -46,7 +46,9 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
          // Order by key
          if (limits.endAt !== undefined && starting.startAt === limits.endAt) {
             // Same as just getting this child
-            return { results: [await transformer(await cursorQuery.ref.child(limits.endAt).once('value'))], next: null }
+            const child = await cursorQuery.ref.child(limits.endAt).once('value')
+            if (!child.exists()) return { results: [], next: null }
+            return { results: [await transformer(child)], next: null }
          }
          if (starting.startAt !== null) cursorQuery = cursorQuery.startAt(starting.startAt)
          if (limits.endAt !== undefined) cursorQuery = cursorQuery.endAt(limits.endAt)

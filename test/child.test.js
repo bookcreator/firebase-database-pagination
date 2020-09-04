@@ -196,6 +196,11 @@ describe('.child', function () {
          const results = await paginate.child(database.ref('sameValues'), CHILD_KEY, 3, { startAt: 10, endAt: 10 })
          assert.sameOrderedMembers(results.map(d => d.key), ['REF1', 'REF6', 'REF7'])
       })
+
+      it('should return no values using same startAt and endAt that match nothing', async function () {
+         const results = await paginate.child(database.ref('sameValues'), CHILD_KEY, 3, { startAt: 123456789, endAt: 123456789 })
+         assert.deepStrictEqual(results, [])
+      })
    })
 
    describe('.transformed', function () {
@@ -305,6 +310,12 @@ describe('.child', function () {
             const results = await paginate.child.transformed(database.ref('sameValues'), CHILD_KEY, 3, transformStub, { startAt: 10, endAt: 10 })
             assert.sameOrderedMembers(results, ['REF1', 'REF6', 'REF7'])
             sinon.assert.callCount(transformStub, 3)
+         })
+
+         it('should return no values using same startAt and endAt that match nothing', async function () {
+            const results = await paginate.child.transformed(database.ref('sameValues'), CHILD_KEY, 3, transformStub, { startAt: 123456789, endAt: 123456789 })
+            assert.deepStrictEqual(results, [])
+            sinon.assert.notCalled(transformStub)
          })
       })
    })
