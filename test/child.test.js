@@ -144,6 +144,17 @@ describe('.child', function () {
 
    describe('limits', function () {
 
+      it('should return exact values using equalTo', async function () {
+         const results = await paginate.child(database.ref('sameValues'), CHILD_KEY, 5, { equalTo: 10 })
+         assert.lengthOf(results, 3)
+         assert.sameOrderedMembers(results.map(d => d.key), ['REF1', 'REF6', 'REF7'])
+      })
+
+      it('should return no values using equalTo that matches nothing', async function () {
+         const results = await paginate.child(database.ref('sameValues'), CHILD_KEY, 5, { equalTo: 123456789 })
+         assert.deepStrictEqual(results, [])
+      })
+
       it('should return prefix values when using endAt limit', async function () {
          const results = await paginate.child(database.ref('manyValues'), CHILD_KEY, 5, { endAt: 10 })
          assert.lengthOf(results, 11)
@@ -251,6 +262,19 @@ describe('.child', function () {
       })
 
       describe('limits', function () {
+
+         it('should return exact values using equalTo', async function () {
+            const results = await paginate.child.transformed(database.ref('sameValues'), CHILD_KEY, 5, transformStub, { equalTo: 10 })
+            assert.lengthOf(results, 3)
+            assert.sameOrderedMembers(results, ['REF1', 'REF6', 'REF7'])
+            sinon.assert.callCount(transformStub, 3)
+         })
+
+         it('should return no values using equalTo that matches nothing', async function () {
+            const results = await paginate.child.transformed(database.ref('sameValues'), CHILD_KEY, 5, transformStub, { equalTo: 123456789 })
+            assert.deepStrictEqual(results, [])
+            sinon.assert.notCalled(transformStub)
+         })
 
          it('should return prefix values when using endAt limit', async function () {
             const results = await paginate.child.transformed(database.ref('manyValues'), CHILD_KEY, 5, transformStub, { endAt: 10 })

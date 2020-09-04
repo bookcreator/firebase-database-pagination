@@ -74,6 +74,9 @@ All of the methods except a parameter to return a subset of values.
 const pagination = require('firebase-database-pagination')
 const admin = require('firebase-admin').initializeApp()
 
+// Return all keys where the value is equal to 10
+await pagination.value(admin.database().ref('node'), 10, { equalTo: 10 })
+
 // Return all keys where the value is greater then or equal to 10
 await pagination.value(admin.database().ref('node'), 10, { startAt: 10 })
 

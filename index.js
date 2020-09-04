@@ -11,7 +11,7 @@
  * @returns {D | Promise<D>}
  */
 
-/** @typedef {{ startAt?: any, endAt?: any }} CursorLimits */
+/** @typedef {{ startAt?: any, endAt?: any } | { equalTo: any }} CursorLimits */
 
 /**
  * @template T
@@ -33,7 +33,10 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
       process.emitWarning(`paginate: maxPageSize of ${maxPageSize} is inefficient and will only result in a single new item on each query`, undefined, caller)
    }
 
-   limits = Object.assign({ startAt: null, endAt: undefined }, limits)
+   limits = Object.assign({}, limits)
+   if ('equalTo' in limits) limits = { startAt: limits.equalTo, endAt: limits.equalTo }
+   /** @type {{ startAt: any, endAt: any }} */
+   const _limits = Object.assign({ startAt: null, endAt: undefined }, limits)
 
    /** @typedef {{ startingKey: string | null, startAt: any }} Cursor */
 
@@ -44,21 +47,21 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
       let cursorQuery = query
       if (valueGetter === orderByKeyGetter) {
          // Order by key
-         if (limits.endAt !== undefined && starting.startAt === limits.endAt) {
+         if (_limits.endAt !== undefined && starting.startAt === _limits.endAt) {
             // Same as just getting this child
-            const child = await cursorQuery.ref.child(limits.endAt).once('value')
+            const child = await cursorQuery.ref.child(_limits.endAt).once('value')
             if (!child.exists()) return { results: [], next: null }
             return { results: [await transformer(child)], next: null }
          }
          if (starting.startAt !== null) cursorQuery = cursorQuery.startAt(starting.startAt)
-         if (limits.endAt !== undefined) cursorQuery = cursorQuery.endAt(limits.endAt)
+         if (_limits.endAt !== undefined) cursorQuery = cursorQuery.endAt(_limits.endAt)
       } else {
          // Order by value or child
-         if (limits.endAt !== undefined && starting.startAt === limits.endAt) {
+         if (_limits.endAt !== undefined && starting.startAt === _limits.endAt) {
             if (starting.startingKey === null) {
-               cursorQuery = cursorQuery.equalTo(limits.endAt)
+               cursorQuery = cursorQuery.equalTo(_limits.endAt)
             } else {
-               cursorQuery = cursorQuery.equalTo(limits.endAt, starting.startingKey)
+               cursorQuery = cursorQuery.equalTo(_limits.endAt, starting.startingKey)
             }
          } else {
             if (starting.startingKey === null) {
@@ -66,7 +69,7 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
             } else {
                cursorQuery = cursorQuery.startAt(starting.startAt, starting.startingKey)
             }
-            if (limits.endAt !== undefined) cursorQuery = cursorQuery.endAt(limits.endAt)
+            if (_limits.endAt !== undefined) cursorQuery = cursorQuery.endAt(_limits.endAt)
          }
       }
       const children = await cursorQuery.limitToFirst(maxPageSize).once('value')
@@ -91,7 +94,7 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
    }
 
    /** @type {Cursor} */
-   let previous = { startingKey: null, startAt: limits.startAt }
+   let previous = { startingKey: null, startAt: _limits.startAt }
    /** @type {T[]} */
    const allResults = []
    do {

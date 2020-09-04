@@ -112,6 +112,17 @@ describe('.key', function () {
 
    describe('limits', function () {
 
+      it('should return exact values using equalTo', async function () {
+         const results = await paginate.key(database.ref('limitChildren'), 5, { equalTo: 'REF_5' })
+         assert.lengthOf(results, 1)
+         assert.sameOrderedMembers(results.map(d => d.key), ['REF_5'])
+      })
+
+      it('should return no values using equalTo that matches nothing', async function () {
+         const results = await paginate.key(database.ref('limitChildren'), 5, { equalTo: 'REF_X' })
+         assert.deepStrictEqual(results, [])
+      })
+
       it('should return no values if limits out of bounds using endAt', async function () {
          const results = await paginate.key(database.ref('limitChildren'), 5, { endAt: 'REF_0' })
          assert.deepStrictEqual(results, [])
@@ -204,6 +215,19 @@ describe('.key', function () {
       })
 
       describe('limits', function () {
+
+         it('should return exact values using equalTo', async function () {
+            const results = await paginate.key.transformed(database.ref('limitChildren'), 5, transformStub, { equalTo: 'REF_5' })
+            assert.lengthOf(results, 1)
+            assert.sameOrderedMembers(results, ['REF_5'])
+            sinon.assert.calledOnce(transformStub)
+         })
+
+         it('should return no values using equalTo that matches nothing', async function () {
+            const results = await paginate.key.transformed(database.ref('limitChildren'), 5, transformStub, { equalTo: 'REF_X' })
+            assert.deepStrictEqual(results, [])
+            sinon.assert.notCalled(transformStub)
+         })
 
          it('should return no values if limits out of bounds using endAt', async function () {
             const results = await paginate.key.transformed(database.ref('limitChildren'), 5, transformStub, { endAt: 'REF_0' })
