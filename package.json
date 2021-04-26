@@ -26,6 +26,7 @@
     "preci-test": "yarn lint",
     "ci-test": "nyc --reporter=text --reporter=text-summary test/runner --forbid-only",
     "postversion": "git push --follow-tags",
+    "preint-test": "yarn install",
     "int-test": "mocha --forbid-only"
   },
   "devDependencies": {

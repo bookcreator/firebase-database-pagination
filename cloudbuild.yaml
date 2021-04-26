@@ -5,53 +5,26 @@ tags:
   - integration-tests
   - single-build
 
+options:
+  env:
+    - FIREBASE_DB_NAME=${PROJECT_ID}-${_FIREBASE_DB_NAME}
+
+# Don't use waitFor so tests are all run sequentially and don't causes failures due to duplicate data writes
 steps:
-  # Installs
-  - id: node10-install
-    waitFor: ["-"]
-    name: node:10-alpine
-    entrypoint: yarn
-    args:
-      - install
-
-  - id: node12-install
-    waitFor: ["-"]
-    name: node:12-alpine
-    entrypoint: yarn
-    args:
-      - install
-
-  - id: node14-install
-    waitFor: ["-"]
-    name: node:14-alpine
-    entrypoint: yarn
-    args:
-      - install
-
-  # Tests
   - id: node10-test
-    waitFor: ["node10-install"]
     name: node:10-alpine
     entrypoint: yarn
-    env:
-      - FIREBASE_DB_NAME=${PROJECT_ID}-${_FIREBASE_DB_NAME}
     args:
       - int-test
 
   - id: node12-test
-    waitFor: ["node12-install", "node10-test"]
     name: node:12-alpine
     entrypoint: yarn
-    env:
-      - FIREBASE_DB_NAME=${PROJECT_ID}-${_FIREBASE_DB_NAME}
     args:
       - int-test
 
   - id: node14-test
-    waitFor: ["node14-install", "node12-test"]
     name: node:14-alpine
     entrypoint: yarn
-    env:
-      - FIREBASE_DB_NAME=${PROJECT_ID}-${_FIREBASE_DB_NAME}
     args:
       - int-test
