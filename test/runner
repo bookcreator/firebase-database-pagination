@@ -6,4 +6,4 @@
 
 set -e
 
-exec firebase --config test/fixtures/firebase.json --project against-emulator emulators:exec --only database "./node_modules/mocha/bin/mocha $*"
+exec firebase --config test/fixtures/firebase.json --project against-emulator emulators:exec --only database "./node_modules/mocha/bin/mocha --enable-source-maps $*"
