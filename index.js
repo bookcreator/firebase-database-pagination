@@ -1,7 +1,7 @@
 
 /**
- * @typedef {import('firebase-admin').database.DataSnapshot} DataSnapshot
- * @typedef {import('firebase-admin').database.Reference} Reference
+ * @typedef {import('@firebase/database').DataSnapshot} DataSnapshot
+ * @typedef {import('@firebase/database').Reference} Reference
  */
 
 /** @template D
@@ -17,7 +17,7 @@
  * @template T
  *
  * @param {Function} caller
- * @param {import('firebase-admin').database.Query} query
+ * @param {import('@firebase/database').Query} query
  * @param {(item: DataSnapshot) => any} valueGetter
  * @param {CursorLimits} limits
  * @param {number} maxPageSize
