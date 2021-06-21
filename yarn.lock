@@ -2429,9 +2429,9 @@ firebase-admin@^9.9.0:
     "@google-cloud/storage" "^5.3.0"
 
 firebase-tools@^9.12.1:
-  version "9.12.1"
-  resolved "https://registry.yarnpkg.com/firebase-tools/-/firebase-tools-9.12.1.tgz#c4676f77f95bbaba0a7399c18c15d7edc633cf7b"
-  integrity sha512-izgpgUiG36UwIV12oBu3X8ndACGsxh2cuREnGgTAoTs6P5OC2nEV3riwAak9eQpkuqHfZ6vEuw5ogSbMNqRIgA==
+  version "9.13.1"
+  resolved "https://registry.yarnpkg.com/firebase-tools/-/firebase-tools-9.13.1.tgz#12ec822cb915d46b9e35879c52fee27a8462cc67"
+  integrity sha512-o8sdTxKtZOG1BJ8SmIHLbwJPkp+C25uUWq7Gcu5+Ksc1obHKKa8dYSH2kEC56gXyoGL5vmGdM8UUDTe7oUy4KA==
   dependencies:
     "@google-cloud/pubsub" "^2.7.0"
     "@types/archiver" "^5.1.0"
