@@ -10,6 +10,14 @@
    "env": {
       "node": true
    },
+   "settings": {
+      "node": {
+         "allowModules": [
+            "firebase-admin",
+            "timers"
+         ]
+      }
+   },
    "rules": {
       "node/global-require": "error",
       "node/handle-callback-err": "error",

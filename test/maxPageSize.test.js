@@ -1,6 +1,6 @@
 const assert = require('assert').strict
 const sinon = require('sinon')
-const database = require('firebase-admin').database()
+const database = require('firebase-admin/database').getDatabase()
 const paginate = require('../')
 
 const CHILD_KEY = 'bob'
