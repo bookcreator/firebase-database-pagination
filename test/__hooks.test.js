@@ -5,16 +5,16 @@
 let originalRules
 before(async function getOldIndexesAndCleanupDB() {
    this.timeout(50000)
-   const database = require('firebase-admin').database()
+   const database = require('firebase-admin/database').getDatabase()
    originalRules = await database.getRules()
    await database.ref().remove()
 })
 
 after(async function restoreIndexesAndCleanupDB() {
    this.timeout(5000)
-   const admin = require('firebase-admin')
-   const database = admin.database()
+   const database = require('firebase-admin/database').getDatabase()
    await database.setRules(originalRules)
    await database.ref().remove()
-   await Promise.all(admin.apps.map(a => a.delete()))
+   const firebase = require('firebase-admin/app')
+   await Promise.all(firebase.getApps().map(a => firebase.deleteApp(a)))
 })
