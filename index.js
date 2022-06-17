@@ -1,13 +1,13 @@
-
 /**
  * @typedef {import('@firebase/database-types').DataSnapshot} DataSnapshot
  * @typedef {import('@firebase/database-types').Reference} Reference
+ * @typedef {DataSnapshot & { key: string }} DataSnapshotChild
  */
 
-/** @template D
- *
+/**
+ * @template D
  * @callback Transformer<D>
- * @param {DataSnapshot} snapshot Child of provided reference
+ * @param {DataSnapshotChild} snapshot Child of provided reference
  * @returns {D | Promise<D>}
  */
 
@@ -18,8 +18,8 @@
  *
  * @param {Function} caller
  * @param {import('@firebase/database-types').Query} query
- * @param {(item: DataSnapshot) => any} valueGetter
- * @param {CursorLimits} limits
+ * @param {(item: DataSnapshotChild) => any} valueGetter
+ * @param {CursorLimits | undefined} limits
  * @param {number} maxPageSize
  * @param {Transformer<T>} transformer
  */
@@ -49,7 +49,7 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
          // Order by key
          if (_limits.endAt !== undefined && starting.startAt === _limits.endAt) {
             // Same as just getting this child
-            const child = await cursorQuery.ref.child(_limits.endAt).get()
+            const child = /** @type {DataSnapshotChild} */ (await cursorQuery.ref.child(_limits.endAt).get())
             if (!child.exists()) return { results: [], next: null }
             return { results: [await transformer(child)], next: null }
          }
@@ -73,9 +73,10 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
          }
       }
       const children = await cursorQuery.limitToFirst(maxPageSize).get()
-      /** @type {?Cursor} */
+      /** @type {Cursor?} */
       let next = null
-      children.forEach(d => {
+      children.forEach(_d => {
+         const d = /** @type {DataSnapshotChild} */ (_d)
          if (d.key !== starting.startingKey) {
             transforms.push(Promise.resolve(transformer(d)))
             const nextStartAt = valueGetter(d)
@@ -87,13 +88,12 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
       const results = await Promise.all(transforms)
       if (children.numChildren() < maxPageSize) {
          // Returned less data than a full page, so no more items
-         return { results, next: null }
-      } else {
-         return { results, next }
+         next = null
       }
+      return { results, next }
    }
 
-   /** @type {Cursor} */
+   /** @type {Cursor?} */
    let previous = { startingKey: null, startAt: _limits.startAt }
    /** @type {T[]} */
    const allResults = []
@@ -106,7 +106,7 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
    return allResults
 }
 
-/** @param {DataSnapshot} d */
+/** @param {DataSnapshotChild} d */
 const orderByKeyGetter = d => d.key
 
 /**
