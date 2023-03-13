@@ -1,6 +1,5 @@
 const assert = require('assert').strict
 const sinon = require('sinon')
-const database = require('firebase-admin/database').getDatabase()
 const paginate = require('../')
 
 const CHILD_KEY = 'bob'
@@ -11,13 +10,15 @@ const SRC_REGEX = new RegExp(`${require('path').resolve(__dirname, '..')}/index\
 
 describe('maxPageSize parameter', function () {
 
+   /** @type {{ [name: string]: (db: import('@firebase/database').Database) => [ref: import('@firebase/database').DatabaseReference] }} */
    const maxPageSizeTests = {
-      key: () => [database.ref(BAD_KEY)],
-      value: () => [database.ref(BAD_KEY)],
-      child: () => [database.ref(BAD_KEY), CHILD_KEY],
+      key: db => [db.ref(BAD_KEY)],
+      value: db => [db.ref(BAD_KEY)],
+      child: db => [db.ref(BAD_KEY), CHILD_KEY],
    }
 
    for (const fnName in maxPageSizeTests) {
+      const getRef = maxPageSizeTests[fnName]
 
       /** @typedef {import('../').CursorLimits} CursorLimits */
       const fn = Object.assign(
@@ -26,7 +27,7 @@ describe('maxPageSize parameter', function () {
           * @param {CursorLimits} [limits]
           * @returns {Promise<DataSnapshot[]>}
           */
-         (maxPageSize, limits) => paginate[fnName](...maxPageSizeTests[fnName](), maxPageSize, limits),
+         (maxPageSize, limits) => paginate[fnName](...getRef(database), maxPageSize, limits),
          {
             /**
              * @template T
@@ -35,11 +36,16 @@ describe('maxPageSize parameter', function () {
              * @param {CursorLimits} [limits]
              * @returns {Promise<T[]>}
              */
-            transformed: (maxPageSize, transformer, limits) => paginate[fnName].transformed(...maxPageSizeTests[fnName](), maxPageSize, transformer, limits)
+            transformed: (maxPageSize, transformer, limits) => paginate[fnName].transformed(...getRef(database), maxPageSize, transformer, limits)
          }
       )
 
+      /** @type {import('firebase-admin/database').Database} */
+      let database
       before(async function setIndexes() {
+         // eslint-disable-next-line node/global-require
+         database = require('firebase-admin/database').getDatabase()
+
          this.timeout(5000)
 
          await database.setRules({

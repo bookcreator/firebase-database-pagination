@@ -1,6 +1,5 @@
 const { assert } = require('chai')
 const sinon = require('sinon')
-const database = require('firebase-admin/database').getDatabase()
 const paginate = require('../')
 
 /**
@@ -37,7 +36,12 @@ describe('.key', function () {
    }
    const manyChildrenKeyOrder = Object.keys(initialData.manyChildren).sort((k1, k2) => k1.localeCompare(k2))
 
+   /** @type {import('firebase-admin/database').Database} */
+   let database
    before(async function () {
+      // eslint-disable-next-line node/global-require
+      database = require('firebase-admin/database').getDatabase()
+
       await database.ref().set(initialData)
    })
 

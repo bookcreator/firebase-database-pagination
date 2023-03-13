@@ -1,6 +1,5 @@
 const { assert } = require('chai')
 const sinon = require('sinon')
-const database = require('firebase-admin/database').getDatabase()
 const paginate = require('../')
 
 /**
@@ -43,7 +42,12 @@ describe('.value', function () {
       initialData.manyValues[`REF_${i}`] = i
    }
 
+   /** @type {import('firebase-admin/database').Database} */
+   let database
    before(async function setIndexesAndData() {
+      // eslint-disable-next-line node/global-require
+      database = require('firebase-admin/database').getDatabase()
+
       this.timeout(5000)
 
       const rules = { [BAD_KEY]: index }
