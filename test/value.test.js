@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const paginate = require('../')
 
 /**
- * @typedef {import('firebase-admin').database.DataSnapshot} DataSnapshot
+ * @typedef {import('firebase-admin/database').DataSnapshot} DataSnapshot
  */
 
 const BAD_KEY = '__blah'
