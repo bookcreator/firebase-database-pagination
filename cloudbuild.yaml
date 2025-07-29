@@ -22,3 +22,21 @@ steps:
     entrypoint: yarn
     args:
       - int-test
+
+  - id: node18-test
+    name: node:18-alpine
+    entrypoint: yarn
+    args:
+      - int-test
+
+  - id: node20-test
+    name: node:20-alpine
+    entrypoint: yarn
+    args:
+      - int-test
+
+  - id: node22-test
+    name: node:22-alpine
+    entrypoint: yarn
+    args:
+      - int-test
