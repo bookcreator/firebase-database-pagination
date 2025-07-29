@@ -38,7 +38,7 @@
     "eslint-plugin-n": "^17.21.3",
     "firebase-admin": "^11.5.0",
     "firebase-tools": "^11.24.1",
-    "mocha": "^10.2.0",
+    "mocha": "^11.7.1",
     "sinon": "^15.0.2"
   },
   "peerDependencies": {
