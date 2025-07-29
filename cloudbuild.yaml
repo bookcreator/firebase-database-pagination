@@ -11,24 +11,6 @@ options:
 
 # Don't use waitFor so tests are all run sequentially and don't causes failures due to duplicate data writes
 steps:
-  - id: node14-test
-    name: node:14-alpine
-    entrypoint: yarn
-    args:
-      - int-test
-
-  - id: node16-test
-    name: node:16-alpine
-    entrypoint: yarn
-    args:
-      - int-test
-
-  - id: node18-test
-    name: node:18-alpine
-    entrypoint: yarn
-    args:
-      - int-test
-
   - id: node20-test
     name: node:20-alpine
     entrypoint: yarn

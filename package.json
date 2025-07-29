@@ -17,7 +17,7 @@
   },
   "license": "ISC",
   "engines": {
-    "node": ">=14"
+    "node": ">=20.19.0"
   },
   "scripts": {
     "lint": "eslint --cache --fix .",
