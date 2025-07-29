@@ -37,7 +37,7 @@
     "eslint-plugin-mocha": "^11.1.0",
     "eslint-plugin-n": "^17.21.3",
     "firebase-admin": "^13.4.0",
-    "firebase-tools": "^11.24.1",
+    "firebase-tools": "^14.11.1",
     "mocha": "^11.7.1",
     "sinon": "^21.0.0"
   },
