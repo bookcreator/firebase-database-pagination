@@ -80,7 +80,7 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
          if (d.key !== starting.startingKey) {
             transforms.push(Promise.resolve(transformer(d)))
             const nextStartAt = valueGetter(d)
-            /* istanbul ignore if */
+            /* c8 ignore next */
             if (nextStartAt === undefined) throw new Error('valueGetter must non return undefined for a DataSnapshot')
             next = { startingKey: d.key, startAt: nextStartAt }
          }
