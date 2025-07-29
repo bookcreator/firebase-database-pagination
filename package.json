@@ -39,7 +39,7 @@
     "firebase-admin": "^11.5.0",
     "firebase-tools": "^11.24.1",
     "mocha": "^11.7.1",
-    "sinon": "^15.0.2"
+    "sinon": "^21.0.0"
   },
   "peerDependencies": {
     "@firebase/database": ">=0.12.1",
