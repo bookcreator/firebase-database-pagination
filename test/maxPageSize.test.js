@@ -94,21 +94,7 @@ describe('maxPageSize parameter', function () {
 
          it('should have tidy stack traces for RangeError', async function () {
             await assert.rejects(fn(-1), err => {
-               if (typeof assert.doesNotMatch === 'function') {
-                  assert.doesNotMatch(err.stack, SRC_REGEX)
-               } else {
-                  // assert.doesNotMatch introduced v12.16.0
-                  if (SRC_REGEX.test(err.stack)) {
-                     assert.fail(new assert.AssertionError({
-                        // eslint-disable-next-line node/global-require
-                        message: `The input was expected to not match the regular expression ${SRC_REGEX}. Input:\n\n${require('util').format(err.stack)}\n`,
-                        actual: err.stack,
-                        expected: SRC_REGEX,
-                        operator: 'doesNotMatch',
-                        stackStartFn: assert.AssertionError,
-                     }))
-                  }
-               }
+               assert.doesNotMatch(err.stack, SRC_REGEX)
                return true
             })
          })
