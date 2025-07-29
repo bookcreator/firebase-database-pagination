@@ -44,8 +44,8 @@ describe('.value', function () {
 
    /** @type {import('firebase-admin/database').Database} */
    let database
+
    before(async function setIndexesAndData() {
-      // eslint-disable-next-line node/global-require
       database = require('firebase-admin/database').getDatabase()
 
       this.timeout(5000)
@@ -204,6 +204,7 @@ describe('.value', function () {
 
       /** @type {((snapshot: DataSnapshot) => Promise<string>) & sinon.SinonStub<any[], Promise<string>>} */
       const transformStub = sinon.stub().callsFake(async d => d.key)
+
       beforeEach(function () {
          transformStub.resetHistory()
       })

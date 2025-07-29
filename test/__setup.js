@@ -1,4 +1,4 @@
-/* eslint-disable node/global-require */
+ 
 
 exports.mochaGlobalSetup = () => {
    const admin = require('firebase-admin')

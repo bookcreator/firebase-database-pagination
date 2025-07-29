@@ -5,7 +5,6 @@ const paginate = require('../')
 const CHILD_KEY = 'bob'
 const BAD_KEY = '__blah'
 
-// eslint-disable-next-line node/global-require
 const SRC_REGEX = new RegExp(`${require('path').resolve(__dirname, '..')}/index\\.js`)
 
 describe('maxPageSize parameter', function () {
@@ -42,8 +41,8 @@ describe('maxPageSize parameter', function () {
 
       /** @type {import('firebase-admin/database').Database} */
       let database
+
       before(async function setIndexes() {
-         // eslint-disable-next-line node/global-require
          database = require('firebase-admin/database').getDatabase()
 
          this.timeout(5000)
@@ -61,12 +60,15 @@ describe('maxPageSize parameter', function () {
 
          /** @type {sinon.SinonStub<Parameters<process['emitWarning']>, ReturnType<process['emitWarning']>>} */
          let emitWarningStub
+
          before(function () {
             emitWarningStub = sinon.stub(process, 'emitWarning')
          })
+
          beforeEach(function () {
             emitWarningStub.resetHistory()
          })
+
          after(function () {
             emitWarningStub.restore()
          })
@@ -78,6 +80,7 @@ describe('maxPageSize parameter', function () {
             await assert.rejects(fn(false), RangeError)
             sinon.assert.notCalled(emitWarningStub)
          })
+
          it('should throw error for invalid number values', async function () {
             await assert.rejects(fn(-1), RangeError)
             await assert.rejects(fn(0), RangeError)
