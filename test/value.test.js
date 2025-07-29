@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const paginate = require('../')
 
 /**
- * @typedef {import('firebase-admin/database').DataSnapshot} DataSnapshot
+ * @typedef {import('firebase-admin/database').IteratedDataSnapshot} IteratedDataSnapshot
  */
 
 const BAD_KEY = '__blah'
@@ -202,7 +202,7 @@ describe('.value', function () {
    describe('.transformed', function () {
       this.slow(8000)
 
-      /** @type {((snapshot: DataSnapshot) => Promise<string>) & sinon.SinonStub<any[], Promise<string>>} */
+      /** @type {((snapshot: IteratedDataSnapshot) => Promise<string>) & sinon.SinonStub<any[], Promise<string>>} */
       const transformStub = sinon.stub().callsFake(async d => d.key)
 
       beforeEach(function () {
@@ -222,7 +222,7 @@ describe('.value', function () {
       })
 
       it('should call transformer that returns plain value', async function () {
-         /** @type {((snapshot: DataSnapshot) => boolean) & sinon.SinonStub<any[], boolean>} */
+         /** @type {((snapshot: IteratedDataSnapshot) => boolean) & sinon.SinonStub<any[], boolean>} */
          const plainStub = sinon.stub().callsFake(_d => false)
          const results = await paginate.value.transformed(database.ref('singleValue'), 10, plainStub)
          assert.sameDeepMembers(results, [false])

@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const paginate = require('../')
 
 /**
- * @typedef {import('firebase-admin/database').DataSnapshot} DataSnapshot
+ * @typedef {import('firebase-admin/database').IteratedDataSnapshot} IteratedDataSnapshot
  */
 
 describe('.key', function () {
@@ -54,7 +54,6 @@ describe('.key', function () {
    })
 
    it('should single DataSnapshot for 1 childen', async function () {
-      /** @type {DataSnapshot[]} */
       const results = await paginate.key(database.ref('singleChild'), 10)
       assert.lengthOf(results, 1)
       // Check it's a DataSnapshot
@@ -66,49 +65,42 @@ describe('.key', function () {
    })
 
    it('should return all children when paging over a greater child count', async function () {
-      /** @type {DataSnapshot[]} */
       const results = await paginate.key(database.ref('manyChildren'), Object.keys(initialData.manyChildren).length + 10)
       assert.lengthOf(results, manyChildrenCount)
       assert.sameOrderedMembers(results.map(d => d.key), manyChildrenKeyOrder)
    })
 
    it('should return all children when paging over child count + 1', async function () {
-      /** @type {DataSnapshot[]} */
       const results = await paginate.key(database.ref('manyChildren'), Object.keys(initialData.manyChildren).length + 1)
       assert.lengthOf(results, manyChildrenCount)
       assert.sameOrderedMembers(results.map(d => d.key), manyChildrenKeyOrder)
    })
 
    it('should return all children when paging over child count + 2', async function () {
-      /** @type {DataSnapshot[]} */
       const results = await paginate.key(database.ref('manyChildren'), Object.keys(initialData.manyChildren).length + 2)
       assert.lengthOf(results, manyChildrenCount)
       assert.sameOrderedMembers(results.map(d => d.key), manyChildrenKeyOrder)
    })
 
    it('should return all children when paging over exact child count', async function () {
-      /** @type {DataSnapshot[]} */
       const results = await paginate.key(database.ref('manyChildren'), Object.keys(initialData.manyChildren).length)
       assert.lengthOf(results, manyChildrenCount)
       assert.sameOrderedMembers(results.map(d => d.key), manyChildrenKeyOrder)
    })
 
    it('should return all children when paging over child count - 1', async function () {
-      /** @type {DataSnapshot[]} */
       const results = await paginate.key(database.ref('manyChildren'), Object.keys(initialData.manyChildren).length - 1)
       assert.lengthOf(results, manyChildrenCount)
       assert.sameOrderedMembers(results.map(d => d.key), manyChildrenKeyOrder)
    })
 
    it('should return all children when paging over child count - 2', async function () {
-      /** @type {DataSnapshot[]} */
       const results = await paginate.key(database.ref('manyChildren'), Object.keys(initialData.manyChildren).length - 1)
       assert.lengthOf(results, manyChildrenCount)
       assert.sameOrderedMembers(results.map(d => d.key), manyChildrenKeyOrder)
    })
 
    it('should return all children when paging over less than child count', async function () {
-      /** @type {DataSnapshot[]} */
       const results = await paginate.key(database.ref('manyChildren'), Object.keys(initialData.manyChildren).length - 10)
       assert.lengthOf(results, manyChildrenCount)
       assert.sameOrderedMembers(results.map(d => d.key), manyChildrenKeyOrder)
@@ -175,7 +167,7 @@ describe('.key', function () {
    describe('.transformed', function () {
       this.slow(800)
 
-      /** @type {((snapshot: DataSnapshot) => Promise<string>) & sinon.SinonStub<any[], Promise<string>>} */
+      /** @type {((snapshot: IteratedDataSnapshot) => Promise<string>) & sinon.SinonStub<any[], Promise<string>>} */
       const transformStub = sinon.stub().callsFake(async d => d.key)
 
       beforeEach(function () {
@@ -195,7 +187,7 @@ describe('.key', function () {
       })
 
       it('should call transformer that returns plain value', async function () {
-         /** @type {((snapshot: DataSnapshot) => boolean) & sinon.SinonStub<any[], boolean>} */
+         /** @type {((snapshot: IteratedDataSnapshot) => boolean) & sinon.SinonStub<any[], boolean>} */
          const plainStub = sinon.stub().callsFake(_d => false)
          const results = await paginate.key.transformed(database.ref('singleChild'), 10, plainStub)
          assert.sameDeepMembers(results, [false])

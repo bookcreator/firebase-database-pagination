@@ -1,13 +1,12 @@
 /**
- * @typedef {import('@firebase/database-types').DataSnapshot} DataSnapshot
+ * @typedef {import('@firebase/database-types').IteratedDataSnapshot} IteratedDataSnapshot
  * @typedef {import('@firebase/database-types').Reference} Reference
- * @typedef {DataSnapshot & { key: string }} DataSnapshotChild
  */
 
 /**
- * @template D
+ * @template [D=void]
  * @callback Transformer<D>
- * @param {DataSnapshotChild} snapshot Child of provided reference
+ * @param {IteratedDataSnapshot} snapshot Child of provided reference
  * @returns {D | Promise<D>}
  */
 
@@ -18,7 +17,7 @@
  *
  * @param {Function} caller
  * @param {import('@firebase/database-types').Query} query
- * @param {(item: DataSnapshotChild) => any} valueGetter
+ * @param {(item: IteratedDataSnapshot) => any} valueGetter
  * @param {CursorLimits | undefined} limits
  * @param {number} maxPageSize
  * @param {Transformer<T>} transformer
@@ -49,7 +48,7 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
          // Order by key
          if (_limits.endAt !== undefined && starting.startAt === _limits.endAt) {
             // Same as just getting this child
-            const child = /** @type {DataSnapshotChild} */ (await cursorQuery.ref.child(_limits.endAt).get())
+            const child = /** @type {IteratedDataSnapshot} */ (await cursorQuery.ref.child(_limits.endAt).get())
             if (!child.exists()) return { results: [], next: null }
             return { results: [await transformer(child)], next: null }
          }
@@ -75,8 +74,7 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
       const children = await cursorQuery.limitToFirst(maxPageSize).get()
       /** @type {Cursor?} */
       let next = null
-      children.forEach(_d => {
-         const d = /** @type {DataSnapshotChild} */ (_d)
+      children.forEach(d => {
          if (d.key !== starting.startingKey) {
             transforms.push(Promise.resolve(transformer(d)))
             const nextStartAt = valueGetter(d)
@@ -106,7 +104,7 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
    return allResults
 }
 
-/** @param {DataSnapshotChild} d */
+/** @type {Transformer<string>} */
 const orderByKeyGetter = d => d.key
 
 /**
@@ -127,7 +125,7 @@ const transformPaginatedKeyCursorReference = async (caller, reference, maxPageSi
  */
 module.exports.key = async (reference, maxPageSize, limits) => await transformPaginatedKeyCursorReference(module.exports.key, reference, maxPageSize, d => d, limits)
 /**
- * @template T
+ * @template [T=IteratedDataSnapshot]
  *
  * @param {Reference} reference
  * @param {number} maxPageSize
@@ -154,7 +152,7 @@ const transformPaginatedValueCursorReference = async (caller, reference, maxPage
  */
 module.exports.value = async (reference, maxPageSize, limits) => await transformPaginatedValueCursorReference(module.exports.value, reference, maxPageSize, d => d, limits)
 /**
- * @template T
+ * @template [T=IteratedDataSnapshot]
  *
  * @param {Reference} reference
  * @param {number} maxPageSize
@@ -183,7 +181,7 @@ const transformPaginatedChildValueCursorReference = async (caller, reference, ch
  */
 module.exports.child = async (reference, childKey, maxPageSize, limits) => await transformPaginatedChildValueCursorReference(module.exports.child, reference, childKey, maxPageSize, d => d, limits)
 /**
- * @template T
+ * @template [T=IteratedDataSnapshot]
  *
  * @param {Reference} reference
  * @param {string} childKey

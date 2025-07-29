@@ -2,6 +2,10 @@ const assert = require('assert').strict
 const sinon = require('sinon')
 const paginate = require('../')
 
+/**
+ * @typedef {import('firebase-admin/database').IteratedDataSnapshot} IteratedDataSnapshot
+ */
+
 const CHILD_KEY = 'bob'
 const BAD_KEY = '__blah'
 
@@ -24,7 +28,7 @@ describe('maxPageSize parameter', function () {
          /**
           * @param {number} maxPageSize
           * @param {CursorLimits} [limits]
-          * @returns {Promise<DataSnapshot[]>}
+          * @returns {Promise<IteratedDataSnapshot[]>}
           */
          (maxPageSize, limits) => paginate[fnName](...getRef(database), maxPageSize, limits),
          {
