@@ -65,6 +65,19 @@ const values = await pagination.key.transformed(admin.database().ref('node'), 10
 // values is an array of DataSnaphots pointing at /other/<nodeChildKey>
 ```
 
+## Stopping iteration early
+
+The `.key`, `.value` and `.child` methods have a `.forEach` function property which allows iteration in a similar maner to `DataSnapshot#forEach`, returning a truthy value to stop iteration early.
+
+```js
+const pagination = require('firebase-database-pagination')
+const admin = require('firebase-admin').initializeApp()
+
+const stopped = await pagination.key.forEach(admin.database().ref('node'), 10, nodeChildSnapshot => {
+   return nodeChildSnapshot.child('valid').exists()
+})
+// stopped will be true if any child node had a `valid` child.
+```
 
 ## Limiting the query
 

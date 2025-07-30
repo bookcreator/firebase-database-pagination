@@ -10,6 +10,17 @@
  * @returns {D | Promise<D>}
  */
 
+/**
+ * @template D
+ * @typedef {Transformer<D> & { signal?: AbortSignal }} AbortableTransformer
+ */
+
+/**
+ * @callback ForEachIterator
+ * @param {IteratedDataSnapshot} snapshot Child of provided reference
+ * @returns {boolean | void | Promise<boolean | void>}
+ */
+
 /** @typedef {{ startAt?: any, endAt?: any } | { equalTo: any }} CursorLimits */
 
 /**
@@ -20,7 +31,7 @@
  * @param {(item: IteratedDataSnapshot) => any} valueGetter
  * @param {CursorLimits | undefined} limits
  * @param {number} maxPageSize
- * @param {Transformer<T>} transformer
+ * @param {AbortableTransformer<T>} transformer
  */
 const transformPaginatedCursorReference = async (caller, query, valueGetter, limits, maxPageSize, transformer) => {
    if (typeof maxPageSize !== 'number' || maxPageSize <= 1) {
@@ -74,16 +85,41 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
       const children = await cursorQuery.limitToFirst(maxPageSize).get()
       /** @type {Cursor?} */
       let next = null
-      children.forEach(d => {
-         if (d.key !== starting.startingKey) {
-            transforms.push(Promise.resolve(transformer(d)))
+      /** @type {T[]} */
+      let results
+      if (transformer.signal) {
+         // If we've got an abortable signal we need to iterate serially to ensure we stop when told
+         results = []
+         /** @type {IteratedDataSnapshot[]} */
+         const childSnapshots = []
+         children.forEach(d => {
+            if (d.key !== starting.startingKey) childSnapshots.push(d)
+         })
+         for (const d of childSnapshots) {
+            if (transformer.signal.aborted) {
+               next = null // End early
+               break
+            }
+            results.push(await transformer(d))
             const nextStartAt = valueGetter(d)
             /* c8 ignore next */
             if (nextStartAt === undefined) throw new Error('valueGetter must non return undefined for a DataSnapshot')
             next = { startingKey: d.key, startAt: nextStartAt }
          }
-      })
-      const results = await Promise.all(transforms)
+         // Clear iteration list quickly
+         childSnapshots.length = 0
+      } else {
+         children.forEach(d => {
+            if (d.key !== starting.startingKey) {
+               transforms.push(Promise.resolve(transformer(d)))
+               const nextStartAt = valueGetter(d)
+               /* c8 ignore next */
+               if (nextStartAt === undefined) throw new Error('valueGetter must non return undefined for a DataSnapshot')
+               next = { startingKey: d.key, startAt: nextStartAt }
+            }
+         })
+         results = await Promise.all(transforms)
+      }
       if (children.numChildren() < maxPageSize) {
          // Returned less data than a full page, so no more items
          next = null
@@ -104,6 +140,19 @@ const transformPaginatedCursorReference = async (caller, query, valueGetter, lim
    return allResults
 }
 
+/**  @param {ForEachIterator} iterator */
+function forEachIteratorTransformer(iterator) {
+   const aborter = new AbortController()
+   /** @type {AbortableTransformer<void>} */
+   const t = async d => {
+      // if (!aborter.signal.aborted) {
+      // }
+      if (await iterator(d)) aborter.abort()
+   }
+   t.signal = aborter.signal
+   return /** @type {Transformer & { signal: AbortSignal }} */(t)
+}
+
 /** @type {Transformer<string>} */
 const orderByKeyGetter = d => d.key
 
@@ -113,7 +162,7 @@ const orderByKeyGetter = d => d.key
  * @param {Function} caller
  * @param {Reference} reference
  * @param {number} maxPageSize
- * @param {Transformer<T>} transformer
+ * @param {AbortableTransformer<T>} transformer
  * @param {CursorLimits} [limits={startAt: null, endAt: undefined}]
  */
 const transformPaginatedKeyCursorReference = async (caller, reference, maxPageSize, transformer, limits) => await transformPaginatedCursorReference(caller, reference.orderByKey(), orderByKeyGetter, limits, maxPageSize, transformer)
@@ -133,6 +182,18 @@ module.exports.key = async (reference, maxPageSize, limits) => await transformPa
  * @param {CursorLimits} [limits={startAt: null, endAt: undefined}]
  */
 module.exports.key.transformed = async (reference, maxPageSize, transformer, limits) => await transformPaginatedKeyCursorReference(module.exports.key.transformed, reference, maxPageSize, transformer, limits)
+/**
+ * @param {Reference} reference
+ * @param {number} maxPageSize
+ * @param {ForEachIterator} iterator
+ * @param {CursorLimits} [limits={startAt: null, endAt: undefined}]
+ * @returns {Promise<boolean>} Resolves to `true` if the iteration was stopped (i.e. `true` was returned from `iterator` at any point).
+ */
+module.exports.key.forEach = async (reference, maxPageSize, iterator, limits) => {
+   const transformer = forEachIteratorTransformer(iterator)
+   await transformPaginatedKeyCursorReference(module.exports.key.forEach, reference, maxPageSize, transformer, limits)
+   return transformer.signal.aborted
+}
 
 /**
  * @template T
@@ -140,7 +201,7 @@ module.exports.key.transformed = async (reference, maxPageSize, transformer, lim
  * @param {Function} caller
  * @param {Reference} reference
  * @param {number} maxPageSize
- * @param {Transformer<T>} transformer
+ * @param {AbortableTransformer<T>} transformer
  * @param {CursorLimits} [limits={startAt: null, endAt: undefined}]
  */
 const transformPaginatedValueCursorReference = async (caller, reference, maxPageSize, transformer, limits) => await transformPaginatedCursorReference(caller, reference.orderByValue(), d => d.val(), limits, maxPageSize, transformer)
@@ -160,6 +221,18 @@ module.exports.value = async (reference, maxPageSize, limits) => await transform
  * @param {CursorLimits} [limits={startAt: null, endAt: undefined}]
  */
 module.exports.value.transformed = async (reference, maxPageSize, transformer, limits) => await transformPaginatedValueCursorReference(module.exports.value.transformed, reference, maxPageSize, transformer, limits)
+/**
+ * @param {Reference} reference
+ * @param {number} maxPageSize
+ * @param {ForEachIterator} iterator
+ * @param {CursorLimits} [limits={startAt: null, endAt: undefined}]
+ * @returns {Promise<boolean>} Resolves to `true` if the iteration was stopped (i.e. `true` was returned from `iterator` at any point).
+ */
+module.exports.value.forEach = async (reference, maxPageSize, iterator, limits) => {
+   const transformer = forEachIteratorTransformer(iterator)
+   await transformPaginatedValueCursorReference(module.exports.value.forEach, reference, maxPageSize, transformer, limits)
+   return transformer.signal.aborted
+}
 
 /**
  * @template T
@@ -168,7 +241,7 @@ module.exports.value.transformed = async (reference, maxPageSize, transformer, l
  * @param {Reference} reference
  * @param {string} childKey
  * @param {number} maxPageSize
- * @param {Transformer<T>} transformer
+ * @param {AbortableTransformer<T>} transformer
  * @param {CursorLimits} [limits={startAt: null, endAt: undefined}]
  */
 const transformPaginatedChildValueCursorReference = async (caller, reference, childKey, maxPageSize, transformer, limits) => await transformPaginatedCursorReference(caller, reference.orderByChild(childKey), d => d.child(childKey).val(), limits, maxPageSize, transformer)
@@ -190,4 +263,17 @@ module.exports.child = async (reference, childKey, maxPageSize, limits) => await
  * @param {CursorLimits} [limits={startAt: null, endAt: undefined}]
  */
 module.exports.child.transformed = async (reference, childKey, maxPageSize, transformer, limits) => await transformPaginatedChildValueCursorReference(module.exports.child.transformed, reference, childKey, maxPageSize, transformer, limits)
+/**
+ * @param {Reference} reference
+ * @param {string} childKey
+ * @param {number} maxPageSize
+ * @param {ForEachIterator} iterator
+ * @param {CursorLimits} [limits={startAt: null, endAt: undefined}]
+ * @returns {Promise<boolean>} Resolves to `true` if the iteration was stopped (i.e. `true` was returned from `iterator` at any point).
+ */
+module.exports.child.forEach = async (reference, childKey, maxPageSize, iterator, limits) => {
+   const transformer = forEachIteratorTransformer(iterator)
+   await transformPaginatedChildValueCursorReference(module.exports.child.forEach, reference, childKey, maxPageSize, transformer, limits)
+   return transformer.signal.aborted
+}
 

@@ -275,4 +275,58 @@ describe('.key', function () {
          })
       })
    })
+
+   describe('.forEach', function () {
+      this.slow(800)
+
+      /** @type {((snapshot: IteratedDataSnapshot) => Promise<boolean>) & sinon.SinonStub<[snapshot: IteratedDataSnapshot], Promise<boolean>>} */
+      const iteratorStub = sinon.stub().callsFake(async d => { })
+
+      beforeEach(function () {
+         iteratorStub.resetHistory()
+      })
+
+      it('should never call iterator when paginate has no children', async function () {
+         const stopped = await paginate.key.forEach(database.ref('noChildren'), 10, iteratorStub)
+         assert.strictEqual(stopped, false)
+         sinon.assert.notCalled(iteratorStub)
+      })
+
+      it('should call iterator once when paginate has a single child', async function () {
+         const stopped = await paginate.key.forEach(database.ref('singleChild'), 10, iteratorStub)
+         assert.strictEqual(stopped, false)
+         sinon.assert.calledOnceWithMatch(iteratorStub, sinon.match.has('key', Object.keys(initialData.singleChild)[0]))
+      })
+
+      it('should call iterator the same number of times as children when paginate has a many children', async function () {
+         this.slow(1200)
+
+         const stopped = await paginate.key.forEach(database.ref('manyChildren'), 10, iteratorStub)
+         assert.strictEqual(stopped, false)
+         sinon.assert.callCount(iteratorStub, Object.keys(initialData.manyChildren).length)
+      })
+
+      it('should call iterator in same correct order', async function () {
+         const stopped = await paginate.key.forEach(database.ref('manyChildren'), Object.keys(initialData.manyChildren).length, iteratorStub)
+         assert.strictEqual(stopped, false)
+         sinon.assert.callCount(iteratorStub, manyChildrenKeyOrder.length)
+         manyChildrenKeyOrder.forEach((k, idx) => {
+            sinon.assert.calledWithMatch(iteratorStub.getCall(idx), sinon.match.has('key', k))
+         })
+      })
+
+      it('should call iterator twice when iteration is stopped after 2 children', async function () {
+         /** @type {((snapshot: IteratedDataSnapshot) => Promise<boolean>) & sinon.SinonStub<[snapshot: IteratedDataSnapshot], Promise<boolean>>} */
+         const iteratorStub = sinon.stub()
+         iteratorStub.onFirstCall().resolves()
+         iteratorStub.onSecondCall().resolves(true)
+
+         const stopped = await paginate.key.forEach(database.ref('manyChildren'), 10, iteratorStub)
+         assert.strictEqual(stopped, true)
+         sinon.assert.calledTwice(iteratorStub)
+         manyChildrenKeyOrder.slice(0, 2).forEach((k, idx) => {
+            sinon.assert.calledWithMatch(iteratorStub.getCall(idx), sinon.match.has('key', k))
+         })
+      })
+   })
 })
