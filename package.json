@@ -6,7 +6,7 @@
   "files": [],
   "repository": {
     "type": "git",
-    "url": "https://github.com/bookcreator/firebase-database-pagination"
+    "url": "git+https://github.com/bookcreator/firebase-database-pagination.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
@@ -22,11 +22,10 @@
   "scripts": {
     "lint": "eslint --cache --fix .",
     "test-debug": "test/runner --inspect=60000 --no-timeout",
-    "test": "c8 --reporter=html --reporter=text-summary test/runner",
-    "preci-test": "yarn lint",
-    "ci-test": "c8 --reporter=text --reporter=text-summary test/runner --forbid-only",
+    "pretest": "eslint --cache",
+    "test": "c8 --reporter=text --reporter=html --reporter=text-summary test/runner",
     "postversion": "git push --follow-tags",
-    "preint-test": "yarn install",
+    "preint-test": "npm ci",
     "int-test": "mocha --forbid-only"
   },
   "devDependencies": {

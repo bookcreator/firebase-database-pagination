@@ -353,7 +353,7 @@ describe('.child', function () {
       this.slow(800)
 
       /** @type {((snapshot: IteratedDataSnapshot) => Promise<boolean>) & sinon.SinonStub<[snapshot: IteratedDataSnapshot], Promise<boolean>>} */
-      const iteratorStub = sinon.stub().callsFake(async d => { })
+      const iteratorStub = sinon.stub().callsFake(async _d => { })
 
       beforeEach(function () {
          iteratorStub.resetHistory()

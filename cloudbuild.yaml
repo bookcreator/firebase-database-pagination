@@ -13,12 +13,14 @@ options:
 steps:
   - id: node20-test
     name: node:20-alpine
-    entrypoint: yarn
+    entrypoint: npm
     args:
+      - run
       - int-test
 
   - id: node22-test
     name: node:22-alpine
-    entrypoint: yarn
+    entrypoint: npm
     args:
+      - run
       - int-test
