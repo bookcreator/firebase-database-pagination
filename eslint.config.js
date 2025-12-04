@@ -11,14 +11,13 @@ module.exports = defineConfig([
    {
       name: 'Source',
       languageOptions: {
-         ecmaVersion: 2024,
+         ecmaVersion: 2025,
          sourceType: 'commonjs',
          parserOptions: {
             ecmaFeatures: {
                impliedStrict: true
             }
          },
-         globals: {}
       },
       plugins: {
          js,
@@ -28,14 +27,6 @@ module.exports = defineConfig([
          'js/recommended',
          'n/flat/recommended',
       ],
-      settings: {
-         node: {
-            allowModules: [
-               'firebase-admin',
-               'timers'
-            ]
-         }
-      },
       rules: {
          'n/global-require': 'error',
          'n/handle-callback-err': 'error',
@@ -99,8 +90,8 @@ module.exports = defineConfig([
       ],
       rules: {
          'n/global-require': 'off',
-         'mocha/no-top-level-hooks': 'off',
+         'no-loop-func': 'off',
          'mocha/no-setup-in-describe': 'off',
-      }
+      },
    },
 ])
