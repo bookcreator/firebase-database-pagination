@@ -24,3 +24,10 @@ steps:
     args:
       - run
       - int-test
+
+  - id: node24-test
+    name: node:24-alpine
+    entrypoint: npm
+    args:
+      - run
+      - int-test
